@@ -15,6 +15,14 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!process.env.MONGODB_URI) {
+      console.error('MongoDB URI is not configured');
+      return NextResponse.json(
+        { error: 'Database configuration error' },
+        { status: 500 }
+      );
+    }
+
     console.log('Processing email:', email);
     
     // Add subscriber using direct MongoDB connection
@@ -27,8 +35,9 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error('Error in subscribe route:', error);
+    // Return a more user-friendly error message
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to subscribe. Please try again later.' },
       { status: 500 }
     );
   }
