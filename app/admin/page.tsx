@@ -1,14 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import fs from 'fs';
-import path from 'path';
+import { useState, useEffect } from 'react';
+
+interface WaitlistData {
+  emails: string[];
+}
 
 export default function AdminPage() {
-  const [waitlist, setWaitlist] = useState(() => {
-    const WAITLIST_FILE = path.join(process.cwd(), 'data', 'waitlist.json');
-    return JSON.parse(fs.readFileSync(WAITLIST_FILE, 'utf-8'));
-  });
+  const [waitlist, setWaitlist] = useState<WaitlistData>({ emails: [] });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchWaitlist = async () => {
+      try {
+        const response = await fetch('/api/waitlist');
+        if (!response.ok) {
+          throw new Error('Failed to fetch waitlist data');
+        }
+        const data = await response.json();
+        setWaitlist(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load waitlist');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWaitlist();
+  }, []);
 
   const downloadCSV = () => {
     const csvContent = ['Email,Date Added\n'];
@@ -26,6 +46,22 @@ export default function AdminPage() {
     link.click();
     document.body.removeChild(link);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#faf2e7] p-8 flex items-center justify-center">
+        <div className="text-[#847158]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#faf2e7] p-8 flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#faf2e7] p-8">
