@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/utils/mongodb';
+import { addSubscriber } from '@/utils/mongodb';
 
 export async function POST(request: Request) {
   try {
@@ -17,19 +17,12 @@ export async function POST(request: Request) {
 
     console.log('Processing email:', email);
     
-    // Connect to MongoDB
-    const client = await clientPromise;
-    const db = client.db("covolabs");
-    
-    // Add to subscribers collection
-    await db.collection("subscribers").insertOne({
-      email,
-      timestamp: new Date()
-    });
+    // Add subscriber using direct MongoDB connection
+    const result = await addSubscriber(email);
 
     console.log('Successfully added subscriber:', email);
     return NextResponse.json(
-      { message: 'Successfully subscribed' },
+      { message: 'Successfully subscribed', id: result.insertedId },
       { status: 200 }
     );
   } catch (error) {

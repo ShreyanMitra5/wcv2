@@ -41,25 +41,13 @@ export default clientPromise;
 
 export async function addSubscriber(email: string) {
   try {
-    const response = await fetch('https://data.mongodb-api.com/app/data-api/endpoint/data/v1/action/insertOne', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': process.env.MONGODB_API_KEY || '',
-      },
-      body: JSON.stringify({
-        dataSource: 'Email',
-        database: 'covolabs',
-        collection: 'subscribers',
-        document: {
-          email,
-          timestamp: new Date().toISOString()
-        }
-      })
+    const client = await clientPromise;
+    const db = client.db("covolabs");
+    const result = await db.collection("subscribers").insertOne({
+      email,
+      timestamp: new Date()
     });
-
-    const data = await response.json();
-    return data;
+    return result;
   } catch (error) {
     console.error('Error adding subscriber:', error);
     throw error;
@@ -68,22 +56,13 @@ export async function addSubscriber(email: string) {
 
 export async function getSubscribers() {
   try {
-    const response = await fetch('https://data.mongodb-api.com/app/data-api/endpoint/data/v1/action/find', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': process.env.MONGODB_API_KEY || '',
-      },
-      body: JSON.stringify({
-        dataSource: 'Email',
-        database: 'covolabs',
-        collection: 'subscribers',
-        sort: { timestamp: -1 }
-      })
-    });
-
-    const data = await response.json();
-    return data;
+    const client = await clientPromise;
+    const db = client.db("covolabs");
+    const subscribers = await db.collection("subscribers")
+      .find({})
+      .sort({ timestamp: -1 })
+      .toArray();
+    return subscribers;
   } catch (error) {
     console.error('Error getting subscribers:', error);
     throw error;
