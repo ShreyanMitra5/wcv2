@@ -1,5 +1,9 @@
 import { MongoClient } from 'mongodb';
 
+// Add debugging
+console.log('Environment:', process.env.NODE_ENV);
+console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
@@ -41,15 +45,18 @@ export default clientPromise;
 
 export async function addSubscriber(email: string) {
   try {
+    console.log('Attempting to connect to MongoDB...');
     const client = await clientPromise;
+    console.log('Connected to MongoDB successfully');
     const db = client.db("covolabs");
     const result = await db.collection("subscribers").insertOne({
       email,
       timestamp: new Date()
     });
+    console.log('Successfully inserted document with ID:', result.insertedId);
     return result;
   } catch (error) {
-    console.error('Error adding subscriber:', error);
+    console.error('Detailed error in addSubscriber:', error);
     throw error;
   }
 }
