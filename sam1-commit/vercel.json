@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm install --no-frozen-lockfile && pnpm run build",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "framework": "nextjs",
+  "env": {
+    "MONGODB_URI": "mongodb+srv://shreyanmitra09:shreyanmitra55@email2.byfgsqd.mongodb.net/covolabs?retryWrites=true&w=majority&appName=email2"
+  }
+} 
